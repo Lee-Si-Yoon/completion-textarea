@@ -1,0 +1,43 @@
+{
+  "name": "completion-textarea",
+  "version": "0.0.1-beta",
+  "description": "",
+  "main": "build/index.js",
+  "module": "build/index.esm.js",
+  "files": [
+    "build"
+  ],
+  "types": "build/src/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf build/*",
+    "build": "yarn clean && rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lee-Si-Yoon/completion-textarea.git"
+  },
+  "keywords": [
+    "React",
+    "Component"
+  ],
+  "author": "lee-si-yoon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Lee-Si-Yoon/completion-textarea/issues"
+  },
+  "peerDependencies": {
+    "react": ">=17.2.0",
+    "react-dom": ">=17.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@babel/core": "^7.21.0",
+    "babel-loader": "^8.2.2",
+    "babel-preset-react-app": "^10.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rollup": "^2.56.3"
+  }
+}

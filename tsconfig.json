@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    /* Base options */
+    "esModuleInterop": true, // smooths out cjs-esm interop
+    "skipLibCheck": true, // skip type checks on declaration files
+    "target": "es2022",
+    "verbatimModuleSyntax": true, // ensure correct cjs OR esm
+    "resolveJsonModule": true, // to use json files
+    "moduleDetection": "force", // treat every file as module not global script
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    /* Bundler */
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "noEmit": true,
+    /* Lib */
+    "lib": ["es2022", "dom", "dom.iterable"],
+    /* Declaration */
+    "declaration": true,
+    "declarationDir": "build",
+    /* React */
+    "jsx": "react"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "build"]
+}
