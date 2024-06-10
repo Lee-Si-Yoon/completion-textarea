@@ -22,6 +22,6 @@
     /* React */
     "jsx": "react"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*", "stories/**/*"],
   "exclude": ["node_modules", "build"]
 }
