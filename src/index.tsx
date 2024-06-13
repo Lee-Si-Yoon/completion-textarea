@@ -1,34 +1,50 @@
 import React from 'react';
+import { useElementSize } from './utils/use-element-size';
 
 type Nullish<T> = T | null | undefined;
 
 const noop = () => {};
-const delay = <T,>(time: number, value: T): Promise<T> =>
-  new Promise((res) => setTimeout(() => res(value), time));
-
-const getMockData = async () => {
-  const data = await delay(1000, 'done');
-
-  return data;
-};
 
 export const Text = () => {
   const [value, setValue] = React.useState('');
   const [generated, setGenerated] = React.useState('');
 
-  return (
-    <Inner
-      value={value}
-      setValue={setValue}
-      generated={generated}
-      setGenerated={setGenerated}
-      placeholder="type anything..."
-      onInput={async () => {
-        const data = await getMockData();
+  const [loading, setLoading] = React.useState(false);
+  const controllerRef = React.useRef<AbortController>();
+  const handleInput = async () => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
 
-        setGenerated(data);
-      }}
-    />
+    controllerRef.current = new AbortController();
+    const { signal } = controllerRef.current;
+
+    setLoading(true);
+    const response = await fetch('https://httpbin.org/delay/1', {
+      signal,
+    })
+      .then((res) => res.json())
+      .then((json) => json.url)
+      .catch(noop);
+
+    if (response?.length) {
+      setGenerated(response);
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <i>{loading ? 'loading...' : 'Done!'}</i>
+      <Inner
+        value={value}
+        setValue={setValue}
+        generated={generated}
+        setGenerated={setGenerated}
+        placeholder="type anything..."
+        onChange={handleInput}
+      />
+    </>
   );
 };
 
@@ -37,46 +53,58 @@ const Inner = ({
   setValue,
   generated,
   setGenerated,
-  ...props
+  onInput,
+  onChange,
 }: {
   /* TODO: support uncontrolled mode */
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
-  generated?: Nullish<string>;
-  setGenerated?: React.Dispatch<React.SetStateAction<string>>;
-} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
+  generated: Nullish<string>;
+  setGenerated: React.Dispatch<React.SetStateAction<string>>;
+} & Pick<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'placeholder' | 'onChange' | 'onInput'
+>) => {
+  const [ref, { width, height }] = useElementSize();
+
   return (
     <div style={{ position: 'relative' }}>
       <textarea
         value={value + ' ' + generated}
         onChange={noop}
         style={{
-          border: '1px solid red',
+          /* TOOD: disable size synchronization if resize is none */
+          width,
+          height,
           position: 'absolute',
           color: '#999',
-          width: '100%',
-          resize: 'none',
         }}
       />
       <textarea
-        {...props}
+        /* TODO: merge ref for auto focus */
+        ref={ref}
         value={value}
-        onInput={(e) => {
+        onChange={(e) => {
+          onChange && onChange(e);
           setValue(e.currentTarget.value);
-          props.onInput && props.onInput(e);
+        }}
+        onInput={(e) => {
+          onInput && onInput(e);
+          setValue(e.currentTarget.value);
         }}
         onKeyDown={(e) => {
-          /* TODO: focus trap */
           if (e.key === 'Tab') {
+            e.preventDefault();
+
             setValue(value + ' ' + generated);
-            setGenerated && setGenerated('');
+            setGenerated('');
+
+            return false;
           }
         }}
         style={{
           position: 'absolute',
           backgroundColor: 'transparent',
-          width: '100%',
-          resize: 'none',
         }}
       />
     </div>
