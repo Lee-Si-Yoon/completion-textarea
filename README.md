@@ -1,5 +1,18 @@
 # completion-textarea
 
+## Specs
+
+- [ ] selection event + right click context menu
+  - [ ] input: selected area text + full context
+  - [ ] output: chat interface + line stretch
+- [ ] virtual cursor
+  - [ ] input: current position
+  - [ ] output: overlay icon(opens context menu)
+- [ ] recommendation
+  - [ ] input: user input + custom triggers(e.g. after letter "=" OR if no additional input for 2sec)
+  - [ ] output: dimmed recommendation, on custom key event(default tab keyPress) extend value and reset trigger
+- [ ] line count + line focus
+
 ## Demos
 
 - [ ] vercel AI SDK
@@ -36,7 +49,7 @@ userInputReplaced --> initialize
 ```
 
 - [ ] implement above flow
-  - [ ] focus trap when tab is input
+  - [x] focus trap when tab is input
 - [ ] support debounce related props
 - [ ] support uncontrolled mode
 

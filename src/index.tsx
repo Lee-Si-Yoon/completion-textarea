@@ -1,112 +1,44 @@
 import React from 'react';
-import { useElementSize } from './utils/use-element-size';
-
-type Nullish<T> = T | null | undefined;
-
-const noop = () => {};
+import { Editor } from './editor';
 
 export const Text = () => {
-  const [value, setValue] = React.useState('');
-  const [generated, setGenerated] = React.useState('');
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const mainRef = React.useRef<HTMLTextAreaElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const selectionRef = React.useRef<HTMLDivElement>(null);
 
-  const [loading, setLoading] = React.useState(false);
-  const controllerRef = React.useRef<AbortController>();
-  const handleInput = async () => {
-    if (controllerRef.current) {
-      controllerRef.current.abort();
-    }
+  React.useEffect(() => {
+    if (
+      !containerRef.current ||
+      !mainRef.current ||
+      !canvasRef.current ||
+      !selectionRef.current
+    )
+      return;
 
-    controllerRef.current = new AbortController();
-    const { signal } = controllerRef.current;
+    const editor = new Editor({
+      container: containerRef.current,
+      textarea: mainRef.current,
+      canvas: canvasRef.current,
+      selection: selectionRef.current,
+      initialValue: 'Hello, World!',
+    });
 
-    setLoading(true);
-    const response = await fetch('https://httpbin.org/delay/1', {
-      signal,
-    })
-      .then((res) => res.json())
-      .then((json) => json.url)
-      .catch(noop);
+    editor.container.resize(200, 400);
+    editor.container.textarea.resize(40, 20);
+    editor.container.canvas.resize(200, 400, window.devicePixelRatio || 1);
 
-    if (response?.length) {
-      setGenerated(response);
-      setLoading(false);
-    }
-  };
+    editor.container.focus();
 
-  return (
-    <>
-      <i>{loading ? 'loading...' : 'Done!'}</i>
-      <Inner
-        value={value}
-        setValue={setValue}
-        generated={generated}
-        setGenerated={setGenerated}
-        placeholder="type anything..."
-        onChange={handleInput}
-      />
-    </>
-  );
-};
-
-const Inner = ({
-  value,
-  setValue,
-  generated,
-  setGenerated,
-  onInput,
-  onChange,
-}: {
-  /* TODO: support uncontrolled mode */
-  value: string;
-  setValue: React.Dispatch<React.SetStateAction<string>>;
-  generated: Nullish<string>;
-  setGenerated: React.Dispatch<React.SetStateAction<string>>;
-} & Pick<
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-  'placeholder' | 'onChange' | 'onInput'
->) => {
-  const [ref, { width, height }] = useElementSize();
+    const a = editor.document.insertText('M\nN', 5, 1);
+    console.log(editor.document.storage, a);
+  }, []);
 
   return (
-    <div style={{ position: 'relative' }}>
-      <textarea
-        value={value + ' ' + generated}
-        onChange={noop}
-        style={{
-          /* TOOD: disable size synchronization if resize is none */
-          width,
-          height,
-          position: 'absolute',
-          color: '#999',
-        }}
-      />
-      <textarea
-        /* TODO: merge ref for auto focus */
-        ref={ref}
-        value={value}
-        onChange={(e) => {
-          onChange && onChange(e);
-          setValue(e.currentTarget.value);
-        }}
-        onInput={(e) => {
-          onInput && onInput(e);
-          setValue(e.currentTarget.value);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Tab') {
-            e.preventDefault();
-
-            setValue(value + ' ' + generated);
-            setGenerated('');
-
-            return false;
-          }
-        }}
-        style={{
-          position: 'absolute',
-          backgroundColor: 'transparent',
-        }}
-      />
+    <div ref={containerRef}>
+      <textarea ref={mainRef} tabIndex={-1} />
+      <canvas ref={canvasRef} />
+      <div ref={selectionRef} />
     </div>
   );
 };
