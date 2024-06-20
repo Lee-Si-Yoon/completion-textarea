@@ -2,7 +2,7 @@ import { Listeners } from './listeners';
 
 export class Textarea {
   public element: HTMLTextAreaElement;
-  
+
   private listeners: Listeners;
   private container: HTMLDivElement;
 
