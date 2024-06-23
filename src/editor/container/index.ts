@@ -1,18 +1,33 @@
 import { Textarea } from './textarea';
 import { Canvas } from './canvas';
+import { Selection } from '../selection';
+import { Document } from '../document';
 
 export class Container {
   public textarea: Textarea;
   public canvas: Canvas;
   public container: HTMLDivElement;
 
-  constructor(
-    container: HTMLDivElement,
-    textarea: HTMLTextAreaElement,
-    canvas: HTMLCanvasElement,
-  ) {
+  constructor({
+    document,
+    selection,
+    container,
+    textarea,
+    canvas,
+  }: {
+    document: Document;
+    selection: Selection;
+    container: HTMLDivElement;
+    textarea: HTMLTextAreaElement;
+    canvas: HTMLCanvasElement;
+  }) {
     this.container = container;
-    this.textarea = new Textarea(textarea, this.container);
+    this.textarea = new Textarea({
+      document,
+      selection,
+      element: textarea,
+      container: this.container,
+    });
     this.canvas = new Canvas(canvas);
 
     this.initialize();

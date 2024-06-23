@@ -1,67 +1,51 @@
 export class Document {
-  public storage: string[] = [];
-  public text: string;
-
-  constructor(text?: string) {
+  constructor(
+    private text?: string,
+    private _storage: string[] = [],
+  ) {
     this.text = text || '';
-    this.storage = this.prepareText(this.text);
+    this._storage = this.prepareText(this.text);
   }
 
   private prepareText(text: string) {
     const lines = [];
-    let index = 0;
-    let newIndex: number = 0;
+    let index = 0,
+      newIndex: number = 0;
 
     while (newIndex !== -1) {
       newIndex = text.indexOf('\n', index);
-
-      if (newIndex === -1) {
-        lines.push(text.slice(index));
-      } else {
-        lines.push(text.slice(index, newIndex));
-      }
-
+      lines.push(text.slice(index, newIndex));
       index = newIndex + 1;
     }
 
     return lines;
   }
 
-  get lineCount() {
-    return this.storage.length;
+  get storage() {
+    return this._storage;
   }
 
-  get length() {
-    let sum = 0;
-
-    for (let i = this.storage.length - 1; i >= 0; i--) {
-      sum += this.storage[i]?.length || 0;
-    }
-
-    return sum;
+  get lineCount() {
+    return this._storage.length;
   }
 
   public getLine(index: number) {
-    return this.storage[index];
+    return this._storage[index];
   }
 
-  public charAt(column: number, row: number) {
-    const _row = this.storage[row];
-
-    if (_row !== undefined) {
-      return _row.charAt(column);
+  public insertText(text: string, charIndex: number, line: number) {
+    if (this.storage[line] === undefined) {
+      throw new Error('Invalid line');
     }
 
-    return undefined;
-  }
+    const parsedText = this.prepareText(text);
+    const lastLine = parsedText.at(-1) as string;
 
-  public insertText(text: string, column: number, row: number) {
-    const line = this.storage[row];
-    if (!line) return;
+    let newColumn = lastLine.length || 0;
+    parsedText.length === 1 && (newColumn += charIndex);
 
-    const updatedLine = line.slice(0, column) + text + line.slice(column);
-    this.storage[row] = updatedLine;
-
-    return [column + text.length, row];
+    this.storage[line] =
+      (this.storage[line] as string).substring(0, charIndex) + parsedText[0];
+    this.storage.splice(line + 1, 0, ...parsedText.slice(1));
   }
 }

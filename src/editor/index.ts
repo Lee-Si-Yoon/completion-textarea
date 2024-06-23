@@ -21,8 +21,14 @@ export class Editor {
     initialValue?: string;
   }) {
     this.document = new Document(initialValue);
-    this.container = new Container(container, textarea, canvas);
     this.selection = new Selection(selection, this.document);
+    this.container = new Container({
+      document: this.document,
+      selection: this.selection,
+      container,
+      textarea,
+      canvas,
+    });
 
     this.selection.visible = true;
     this.selection.setSelection(10, 10);

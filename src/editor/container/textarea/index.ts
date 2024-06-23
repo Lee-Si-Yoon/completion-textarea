@@ -1,3 +1,5 @@
+import type { Selection } from '../../selection';
+import type { Document } from '../../document';
 import { Listeners } from './listeners';
 
 export class Textarea {
@@ -6,11 +8,26 @@ export class Textarea {
   private listeners: Listeners;
   private container: HTMLDivElement;
 
-  constructor(element: HTMLTextAreaElement, container: HTMLDivElement) {
+  constructor({
+    document,
+    selection,
+    element,
+    container,
+  }: {
+    document: Document;
+    selection: Selection;
+    element: HTMLTextAreaElement;
+    container: HTMLDivElement;
+  }) {
     this.container = container;
     this.element = element;
 
-    this.listeners = new Listeners(this.element, this.container);
+    this.listeners = new Listeners({
+      document,
+      selection,
+      textarea: this.element,
+      container: this.container,
+    });
     this.listeners.register();
 
     this.initialize();

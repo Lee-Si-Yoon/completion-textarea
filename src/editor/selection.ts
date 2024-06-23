@@ -1,15 +1,22 @@
 import type { Document } from './document';
 
+type Select = {
+  line: number;
+  character: number;
+};
+
 export class Selection {
   private element: HTMLDivElement;
   private document: Document;
+  // is manipulating at right side of selection
+  private activeEndSide: boolean = true;
 
   public isVisible: boolean = false;
-  public start = {
+  public start: Select = {
     line: 0,
     character: 0,
   };
-  public end = {
+  public end: Select = {
     line: 0,
     character: 0,
   };
@@ -30,7 +37,11 @@ export class Selection {
   }
 
   get position() {
-    return [this.end.character, this.end.line];
+    if (this.activeEndSide) {
+      return [this.end.character, this.end.line] as const;
+    } else {
+      return [this.start.character, this.start.line] as const;
+    }
   }
 
   public setSelection(x: number, y: number) {
@@ -47,5 +58,91 @@ export class Selection {
     }
 
     this.isVisible = visible;
+  }
+
+  private comparePosition(one: Select, two: Select) {
+    if (one.line < two.line) {
+      return -1;
+    } else if (one.line > two.line) {
+      return 1;
+    } else {
+      if (one.character < two.character) {
+        return -1;
+      } else if (one.character > two.character) {
+        return 1;
+      }
+      return 0;
+    }
+  }
+
+  public isEmpty() {
+    return this.comparePosition(this.start, this.end) === 0;
+  }
+
+  private forceBounds(character: number, line: number) {
+    line >= 0 || (line = 0);
+    character < 0 || (character = 0);
+
+    const lineCount = this.document.lineCount;
+    line < lineCount || (line = lineCount - 1);
+
+    const characterCount = this.document.getLine(line)?.length || 0;
+    character > characterCount || (character = characterCount);
+
+    return [character, line] as const;
+  }
+
+  private doSetPosition(
+    character: number,
+    line: number,
+    keepSelection: boolean,
+  ) {
+    if (keepSelection) {
+      const compare = this.comparePosition({ line, character }, this.start);
+
+      if (compare === -1 && (this.isEmpty() || line < this.start.line)) {
+        this.activeEndSide = false;
+      }
+
+      if (this.activeEndSide) {
+        this.end = { line, character };
+      } else {
+        this.start = { line, character };
+      }
+    } else {
+      this.activeEndSide = true;
+      this.start.line = this.end.line = line;
+      this.start.character = this.end.character = character;
+    }
+  }
+
+  public setPosition(character: number, line: number, keepSelection: boolean) {
+    const position = this.forceBounds(character, line);
+
+    this.doSetPosition(position[0], position[1], keepSelection);
+  }
+
+  public moveUp(length: number, keepSelection: boolean) {
+    length || (length = 1);
+    const position = this.position;
+    this.setPosition(position[0], position[1] - length, keepSelection);
+  }
+
+  public moveDown(length: number, keepSelection: boolean) {
+    length || (length = 1);
+    const position = this.position;
+    this.setPosition(position[0], position[1] + length, keepSelection);
+  }
+
+  public moveLeft(length: number, keepSelection: boolean) {
+    length || (length = 1);
+    const position = this.position;
+    this.setPosition(position[0] - length, position[1], keepSelection);
+  }
+
+  public moveRight(length: number, keepSelection: boolean) {
+    length || (length = 1);
+    const position = this.position;
+    this.setPosition(position[0] + length, position[1], keepSelection);
   }
 }

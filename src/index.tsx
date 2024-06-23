@@ -29,9 +29,6 @@ export const Text = () => {
     editor.container.canvas.resize(200, 400, window.devicePixelRatio || 1);
 
     editor.container.focus();
-
-    const a = editor.document.insertText('M\nN', 5, 1);
-    console.log(editor.document.storage, a);
   }, []);
 
   return (
