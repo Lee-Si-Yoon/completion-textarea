@@ -1,3 +1,5 @@
+import { assert } from '../utils';
+
 export class Document {
   constructor(
     private text?: string,
@@ -14,7 +16,7 @@ export class Document {
 
     while (newIndex !== -1) {
       newIndex = text.indexOf('\n', index);
-      lines.push(text.slice(index, newIndex));
+      lines.push(text.slice(index, newIndex !== -1 ? newIndex + 1 : undefined));
       index = newIndex + 1;
     }
 
@@ -30,22 +32,93 @@ export class Document {
   }
 
   public getLine(index: number) {
-    return this._storage[index];
+    const line = this._storage[index];
+    assert(line !== undefined, 'Unapproachable line');
+
+    return line;
   }
 
-  public insertText(text: string, charIndex: number, line: number) {
-    if (this.storage[line] === undefined) {
-      throw new Error('Invalid line');
+  public deleteRange(
+    startCharIndex: number,
+    startLine: number,
+    endCharIndex: number,
+    endLine: number,
+  ) {
+    const { lineCount, storage } = this;
+    const start = this.getLine(startLine);
+    const end = this.getLine(endLine);
+
+    startCharIndex = Math.max(0, startCharIndex);
+    startLine = Math.max(0, startLine);
+    if (endLine >= lineCount) {
+      endLine = lineCount - 1;
+    }
+    if (endCharIndex > end.length) {
+      endCharIndex = end.length;
     }
 
-    const parsedText = this.prepareText(text);
-    const lastLine = parsedText.at(-1) as string;
+    storage[startLine] =
+      start.slice(0, startCharIndex) + end.slice(endCharIndex);
+    storage.splice(startLine + 1, endLine - startLine);
 
-    let newColumn = lastLine.length || 0;
-    parsedText.length === 1 && (newColumn += charIndex);
+    return [startCharIndex, startLine] as const;
+  }
 
-    this.storage[line] =
-      (this.storage[line] as string).substring(0, charIndex) + parsedText[0];
-    this.storage.splice(line + 1, 0, ...parsedText.slice(1));
+  public deletChar(
+    startCharIndex: number,
+    startLine: number,
+    foward?: boolean,
+  ) {
+    const { lineCount } = this;
+    const currentLine = this.getLine(startLine);
+    let endLine = startLine;
+    let endCharIndex = startCharIndex;
+
+    if (foward) {
+      const charCount = currentLine.length;
+
+      if (startCharIndex < charCount) {
+        ++endCharIndex;
+      } else {
+        startCharIndex = charCount;
+        if (startLine < lineCount - 1) {
+          ++endLine;
+          endCharIndex = 0;
+        }
+      }
+    } else {
+      if (startCharIndex > 0) {
+        --startCharIndex;
+      } else if (startLine > 0) {
+        --startLine;
+        startCharIndex = this.getLine(startLine).length - 1;
+      }
+    }
+
+    return this.deleteRange(startCharIndex, startLine, endCharIndex, endLine);
+  }
+
+  public insertText(value: string, charIndex: number, line: number) {
+    const text = this.prepareText(value);
+
+    let newCharIndex = text.at(-1)?.length || 0;
+    if (text.length === 1) {
+      newCharIndex += charIndex;
+    }
+
+    const currentLine = this.getLine(line);
+    const remainders = {
+      prev: currentLine.slice(0, charIndex),
+      value: text[0],
+      next: currentLine.slice(charIndex),
+    };
+
+    this.storage[line] = remainders.prev + remainders.value + remainders.next;
+    this.storage.splice(line + 1, 0, ...text.slice(1));
+
+    charIndex = newCharIndex;
+    line += text.length - 1;
+
+    return [charIndex, line] as const;
   }
 }

@@ -25,6 +25,7 @@ export class Selection {
     this.element = element;
     this.document = document;
 
+    this.setPosition(0, 0);
     this.initialize();
   }
 
@@ -44,11 +45,6 @@ export class Selection {
     }
   }
 
-  public setSelection(x: number, y: number) {
-    this.element.style.left = `${x}px`;
-    this.element.style.top = `${y}px`;
-  }
-
   set visible(visible: boolean) {
     if (visible) {
       this.element.style.display = 'block';
@@ -60,15 +56,15 @@ export class Selection {
     this.isVisible = visible;
   }
 
-  private comparePosition(one: Select, two: Select) {
-    if (one.line < two.line) {
+  private comparePosition(prev: Select, next: Select) {
+    if (prev.line < next.line) {
       return -1;
-    } else if (one.line > two.line) {
+    } else if (prev.line > next.line) {
       return 1;
     } else {
-      if (one.character < two.character) {
+      if (prev.character < next.character) {
         return -1;
-      } else if (one.character > two.character) {
+      } else if (prev.character > next.character) {
         return 1;
       }
       return 0;
@@ -80,22 +76,54 @@ export class Selection {
   }
 
   private forceBounds(character: number, line: number) {
-    line >= 0 || (line = 0);
-    character < 0 || (character = 0);
+    const { position } = this;
+    line = Math.max(line, 0);
+
+    if (character < 0) {
+      if (line === position[1] && line > 0) {
+        --line;
+        character = this.document.getLine(line).length;
+      } else {
+        character = 0;
+      }
+    }
 
     const lineCount = this.document.lineCount;
-    line < lineCount || (line = lineCount - 1);
+    const characterCount = this.document.getLine(line).length;
+    line = Math.max(line, lineCount - 1);
 
-    const characterCount = this.document.getLine(line)?.length || 0;
-    character > characterCount || (character = characterCount);
+    if (character > characterCount) {
+      if (line === position[1] && line < lineCount - 1) {
+        ++line;
+        character = 0;
+      } else {
+        character = characterCount;
+      }
+    }
 
     return [character, line] as const;
+  }
+
+  // TODO: call on input change & apply font metrics
+  public updateCursorStyle({
+    scrollLeft,
+    scrollTop,
+  }: {
+    scrollLeft: number;
+    scrollTop: number;
+  }) {
+    const { position } = this;
+    const offsetX = position[0] - scrollLeft;
+    const offsetY = position[1] - scrollTop;
+
+    this.element.style.left = `${offsetX}px`;
+    this.element.style.top = `${offsetY * 12}px`;
   }
 
   private doSetPosition(
     character: number,
     line: number,
-    keepSelection: boolean,
+    keepSelection?: boolean,
   ) {
     if (keepSelection) {
       const compare = this.comparePosition({ line, character }, this.start);
@@ -105,9 +133,11 @@ export class Selection {
       }
 
       if (this.activeEndSide) {
-        this.end = { line, character };
+        this.end.line = line;
+        this.end.character = character;
       } else {
-        this.start = { line, character };
+        this.start.line = line;
+        this.start.character = character;
       }
     } else {
       this.activeEndSide = true;
@@ -116,7 +146,7 @@ export class Selection {
     }
   }
 
-  public setPosition(character: number, line: number, keepSelection: boolean) {
+  public setPosition(character: number, line: number, keepSelection?: boolean) {
     const position = this.forceBounds(character, line);
 
     this.doSetPosition(position[0], position[1], keepSelection);

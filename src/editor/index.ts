@@ -31,6 +31,9 @@ export class Editor {
     });
 
     this.selection.visible = true;
-    this.selection.setSelection(10, 10);
+    this.selection.updateCursorStyle({
+      scrollLeft: this.container.element.scrollLeft,
+      scrollTop: this.container.element.scrollTop,
+    });
   }
 }

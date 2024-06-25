@@ -6,7 +6,7 @@ import { Document } from '../document';
 export class Container {
   public textarea: Textarea;
   public canvas: Canvas;
-  public container: HTMLDivElement;
+  public element: HTMLDivElement;
 
   constructor({
     document,
@@ -21,12 +21,12 @@ export class Container {
     textarea: HTMLTextAreaElement;
     canvas: HTMLCanvasElement;
   }) {
-    this.container = container;
+    this.element = container;
     this.textarea = new Textarea({
       document,
       selection,
       element: textarea,
-      container: this.container,
+      container: this.element,
     });
     this.canvas = new Canvas(canvas);
 
@@ -35,12 +35,12 @@ export class Container {
   }
 
   private initialize() {
-    this.container.style.position = 'relative';
-    this.container.tabIndex = 0;
+    this.element.style.position = 'relative';
+    this.element.tabIndex = 0;
   }
 
   private bindListeners() {
-    this.container.addEventListener(
+    this.element.addEventListener(
       'focus',
       () => {
         this.textarea.element.focus();
@@ -50,11 +50,11 @@ export class Container {
   }
 
   public resize(width: number, height: number) {
-    this.container.style.width = `${width}px`;
-    this.container.style.height = `${height}px`;
+    this.element.style.width = `${width}px`;
+    this.element.style.height = `${height}px`;
   }
 
   public focus() {
-    this.container.focus();
+    this.element.focus();
   }
 }

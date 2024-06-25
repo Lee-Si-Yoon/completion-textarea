@@ -33,19 +33,19 @@ export class Listeners {
     this.element.addEventListener('keydown', this.keyDown.bind(this));
   }
 
-  public input(_e: Event) {
+  private input(_e: Event) {
     const e = _e as InputEvent;
     input(e, this.selection, this.document);
   }
-  public keyDown(_e: Event) {
+  private keyDown(_e: Event) {
     const e = _e as KeyboardEvent;
-    keyDown(e, this.selection);
+    keyDown(e, this.selection, this.document);
   }
-  public blur(_e: Event) {
+  private blur(_e: Event) {
     const e = _e as FocusEvent;
     blur(e, this.container);
   }
-  public focus(_e: Event) {
+  private focus(_e: Event) {
     const e = _e as FocusEvent;
     focus(e, this.container);
   }
