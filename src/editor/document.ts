@@ -2,11 +2,11 @@ import { assert } from '../utils';
 
 export class Document {
   constructor(
-    private text?: string,
-    private _storage: string[] = [],
+    private initialValue?: string,
+    public storage: string[] = [],
   ) {
-    this.text = text || '';
-    this._storage = this.prepareText(this.text);
+    this.initialValue = initialValue || '';
+    this.storage = this.prepareText(this.initialValue);
   }
 
   private prepareText(text: string) {
@@ -23,19 +23,23 @@ export class Document {
     return lines;
   }
 
-  get storage() {
-    return this._storage;
-  }
-
   get lineCount() {
-    return this._storage.length;
+    return this.storage.length;
   }
 
   public getLine(index: number) {
-    const line = this._storage[index];
+    const line = this.storage[index];
     assert(line !== undefined, 'Unapproachable line');
 
     return line;
+  }
+
+  public charAt(charIndex: number, line: number) {
+    const currentLine = this.getLine(line);
+    const char = currentLine[charIndex];
+    assert(char !== undefined, 'Unapproachable char');
+
+    return char;
   }
 
   public deleteRange(
@@ -50,15 +54,11 @@ export class Document {
 
     startCharIndex = Math.max(0, startCharIndex);
     startLine = Math.max(0, startLine);
-    if (endLine >= lineCount) {
-      endLine = lineCount - 1;
-    }
-    if (endCharIndex > end.length) {
-      endCharIndex = end.length;
-    }
+    endLine = Math.min(endLine, lineCount - 1);
+    endCharIndex = Math.min(endCharIndex, end.length - 1);
 
     storage[startLine] =
-      start.slice(0, startCharIndex) + end.slice(endCharIndex);
+      start.slice(0, startCharIndex) + end.slice(endCharIndex + 1);
     storage.splice(startLine + 1, endLine - startLine);
 
     return [startCharIndex, startLine] as const;

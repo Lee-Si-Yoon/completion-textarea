@@ -14,7 +14,8 @@
     "dev": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "eslint . --config eslint.config.mjs",
-    "lint:debug": "eslint . --config eslint.config.mjs --debug"
+    "lint:debug": "eslint . --config eslint.config.mjs --debug",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
@@ -34,17 +35,9 @@
     "react-dom": ">=17.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
     "@babel/core": "^7.21.0",
-    "babel-loader": "^8.2.2",
-    "babel-preset-react-app": "^10.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rollup": "^2.56.3",
-    "typescript": "^5",
-    "storybook": "^8.1.6",
     "@chromatic-com/storybook": "^1.5.0",
+    "@eslint/js": "^9.4.0",
     "@storybook/addon-essentials": "^8.1.6",
     "@storybook/addon-interactions": "^8.1.6",
     "@storybook/addon-links": "^8.1.6",
@@ -54,10 +47,22 @@
     "@storybook/react": "^8.1.6",
     "@storybook/react-webpack5": "^8.1.6",
     "@storybook/test": "^8.1.6",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/ui": "^1.6.0",
+    "babel-loader": "^8.2.2",
+    "babel-preset-react-app": "^10.0.1",
     "eslint": "^8",
-    "@eslint/js": "^9.4.0",
     "eslint-plugin-react": "^7.34.2",
     "globals": "^15.4.0",
-    "typescript-eslint": "^7.12.0"
+    "jsdom": "^24.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rollup": "^2.56.3",
+    "storybook": "^8.1.6",
+    "typescript": "^5",
+    "typescript-eslint": "^7.12.0",
+    "vitest": "^1.6.0"
   }
 }
