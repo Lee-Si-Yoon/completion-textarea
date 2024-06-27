@@ -25,7 +25,6 @@ export class Selection {
     this.element = element;
     this.document = document;
 
-    this.setPosition(0, 0);
     this.initialize();
   }
 
@@ -89,8 +88,8 @@ export class Selection {
     }
 
     const lineCount = this.document.lineCount;
+    line = Math.min(line, lineCount - 1);
     const characterCount = this.document.getLine(line).length;
-    line = Math.max(line, lineCount - 1);
 
     if (character > characterCount) {
       if (line === position[1] && line < lineCount - 1) {
@@ -123,7 +122,7 @@ export class Selection {
   private doSetPosition(
     character: number,
     line: number,
-    keepSelection?: boolean,
+    keepSelection?: boolean
   ) {
     if (keepSelection) {
       const compare = this.comparePosition({ line, character }, this.start);
@@ -152,26 +151,26 @@ export class Selection {
     this.doSetPosition(position[0], position[1], keepSelection);
   }
 
-  public moveUp(length: number, keepSelection: boolean) {
-    length || (length = 1);
+  public moveUp(length: number, keepSelection?: boolean) {
+    length = Math.max(length, 1);
     const position = this.position;
     this.setPosition(position[0], position[1] - length, keepSelection);
   }
 
-  public moveDown(length: number, keepSelection: boolean) {
-    length || (length = 1);
+  public moveDown(length: number, keepSelection?: boolean) {
+    length = Math.max(length, 1);
     const position = this.position;
     this.setPosition(position[0], position[1] + length, keepSelection);
   }
 
-  public moveLeft(length: number, keepSelection: boolean) {
-    length || (length = 1);
+  public moveLeft(length: number, keepSelection?: boolean) {
+    length = Math.max(length, 1);
     const position = this.position;
     this.setPosition(position[0] - length, position[1], keepSelection);
   }
 
-  public moveRight(length: number, keepSelection: boolean) {
-    length || (length = 1);
+  public moveRight(length: number, keepSelection?: boolean) {
+    length = Math.max(length, 1);
     const position = this.position;
     this.setPosition(position[0] + length, position[1], keepSelection);
   }
