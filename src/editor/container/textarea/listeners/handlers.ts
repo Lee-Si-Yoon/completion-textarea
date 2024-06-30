@@ -12,16 +12,20 @@ const deleteCharAtCurrentPosition = ({
 }) => {
   if (!selection.isEmpty()) {
     const { start, end } = selection;
-    const newPosition = document.deleteRange(
-      start.character,
-      start.line,
-      end.character,
-      end.line,
-    );
+    const newPosition = document.deleteRange({
+      startChar: start.character,
+      startLine: start.line,
+      endChar: end.character,
+      endLine: end.line,
+    });
     selection.setPosition(newPosition[0], newPosition[1]);
   } else {
     const { position } = selection;
-    const newPosition = document.deletChar(position[0], position[1], foward);
+    const newPosition = document.deletChar({
+      startChar: position[0],
+      startLine: position[1],
+      foward,
+    });
     selection.setPosition(newPosition[0], newPosition[1]);
   }
 };
@@ -48,7 +52,7 @@ const insertTextAtCurrentPosition = ({
 export const input = (
   e: InputEvent,
   selection: Selection,
-  document: Document,
+  document: Document
 ) => {
   // TODO: handle event type and value
   const _value = (e.target as unknown as { value: string }).value;
@@ -63,7 +67,7 @@ export const input = (
 export const keyDown = (
   e: KeyboardEvent,
   selection: Selection,
-  document: Document,
+  document: Document
 ) => {
   switch (e.key) {
     case 'Tab': {
